@@ -1,0 +1,4 @@
+stone_analysis
+*.o
+.idea/
+.vscode/

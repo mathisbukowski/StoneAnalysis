@@ -1,0 +1,54 @@
+name: Stone Analysis CI CD
+
+env:
+  MIRROR_URL: "git@github.com:EpitechPromo2028/G-CNA-400-LIL-4-1-stoneanalysis-mathis.bukowski.git"
+  MIRROR_NAME: "EpitechPromo2028/G-CNA-400-LIL-4-1-stoneanalysis-mathis.bukowski"
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  check_program_compilation:
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker:latest
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "Compile the Program with Make"
+        run: |
+          make re
+        timeout-minutes: 2
+
+      - name: "Verify Executable Permissions and Presence"
+        run: |
+          if [ -f "stone_analysis" ] && [ -x "stone_analysis" ]; then
+              echo "stone_analysis exists and is executable."
+          else
+              echo "stone_analysis does not exist or is not executable."
+              exit 1
+          fi
+
+  push_to_mirror:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Push to Mirror Repository"
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url: ${{ env.MIRROR_URL }}
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
