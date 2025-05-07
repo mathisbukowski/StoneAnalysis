@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include "Audio/AudioParser.hpp"
+#include "Math.hpp"
 
 int main(void)
 {
@@ -27,6 +28,15 @@ int main(void)
         std::cout << "Sample[" << i << "]: " << samples[i] << std::endl;
     }
 
+    auto fftResult = stone::Math::samplesToFFT(samples);
+    auto ifftResult = stone::Math::ifft(fftResult);
+
+    for (size_t i = 0; i < fftResult.size() / 2; ++i) {
+        std::cout << "FFT[" << i << "]: " << fftResult[i].real()
+                  << " | IFFT[" << i << "]: " << ifftResult[i].real() << std::endl;
+    }
+
+    
     std::cout << "Test passed." << std::endl;
     return 0;
 }

@@ -7,6 +7,7 @@
 
 SRC = src/main.cpp \
 	src/Audio/AudioParser.cpp \
+	src/Math.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 
