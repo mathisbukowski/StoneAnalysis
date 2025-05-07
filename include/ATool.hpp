@@ -16,7 +16,7 @@
 namespace stone {
     class ATool : public ITool {
         public:
-            explicit ATool(const std::string &inputFilename);
+            explicit ATool(const std::string &inputFilename): _inputFilename(inputFilename) {};
             ~ATool() = default;
 
             virtual int execute() const override = 0;

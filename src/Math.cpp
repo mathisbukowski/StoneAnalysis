@@ -9,6 +9,7 @@
 #include "Math.hpp"
 
 #include <cmath>
+#include <algorithm>
 
 namespace stone {
     std::vector<std::complex<double>> Math::fft(const std::vector<std::complex<double>>& input)
@@ -60,5 +61,31 @@ namespace stone {
             complexSamples[i] = std::complex<double>(samples[i], 0);
         }
         return complexSamples;
+    }
+
+    std::vector<std::pair<double, double>> Math::getTopFrequencies(
+        const std::vector<std::complex<double>>& fftResult,
+        int topN)
+    {
+        std::vector<std::pair<double, double>> frequencies;
+        size_t N = fftResult.size();
+    
+        for (size_t i = 0; i < N / 2; ++i) {
+            double magnitude = std::abs(fftResult[i]);
+            double frequency = static_cast<double>(i) * 48000 / N;
+            frequencies.emplace_back(frequency, magnitude);
+        }
+        std::sort(frequencies.begin(), frequencies.end(), [](const auto& a, const auto& b) {
+            return a.second > b.second;
+        });
+        if (frequencies.size() > static_cast<size_t>(topN))
+            frequencies.resize(topN);
+        return frequencies;
+    }
+
+    size_t Math::nextPow2(size_t n) {
+        size_t p = 1;
+        while (p < n) p *= 2;
+        return p;
     }
 }

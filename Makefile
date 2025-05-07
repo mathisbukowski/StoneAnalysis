@@ -8,6 +8,8 @@
 SRC = src/main.cpp \
 	src/Audio/AudioParser.cpp \
 	src/Math.cpp \
+	src/Analyzer/Analyzer.cpp \
+	src/Factory/ToolFactory.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 
