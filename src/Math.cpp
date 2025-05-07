@@ -52,12 +52,13 @@ namespace stone {
         return fftResult;
     }
 
-    std::vector<std::complex<double>> Math::samplesToFFT(const std::vector<int16_t>& samples)
+
+    std::vector<std::complex<double>> Math::sampleToComplex(const std::vector<int16_t>& samples)
     {
         std::vector<std::complex<double>> complexSamples(samples.size());
         for (size_t i = 0; i < samples.size(); i++) {
             complexSamples[i] = std::complex<double>(samples[i], 0);
         }
-        return fft(complexSamples);
+        return complexSamples;
     }
 }
