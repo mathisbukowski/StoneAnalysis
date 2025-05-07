@@ -20,16 +20,10 @@ namespace stone {
 
             int execute() const override;
 
-            std::vector<std::complex<double>> getData() const;
-
-            void setData(const std::vector<std::complex<double>>& data);
-
             int getTopN() const;
 
         private:
             int _topN;
-
-            std::vector<std::complex<double>> _data;
     };
 }
 
