@@ -18,15 +18,15 @@ namespace stone {
             AudioParser() = default;
             ~AudioParser() = default;
 
-            const std::vector<uint16_t>& getSamples() const { return _samples; };
+            const std::vector<int16_t>& getSamples() const { return _samples; };
 
-            const std::vector<uint16_t>& getHeader() const { return _header; };
+            const std::vector<int16_t>& getHeader() const { return _header; };
 
             bool load(const std::string& inputFilename);
 
         private:
-            std::vector<uint16_t> _samples;
-            std::vector<uint16_t> _header;
+            std::vector<int16_t> _samples;
+            std::vector<int16_t> _header;
 
             bool parseHeader(std::ifstream& file);
 

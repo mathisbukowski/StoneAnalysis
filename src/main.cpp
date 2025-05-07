@@ -7,6 +7,13 @@
 
 #include <iostream>
 #include "Audio/AudioParser.hpp"
+#include "Math.hpp"
+
+size_t nextPow2(size_t n) {
+    size_t p = 1;
+    while (p < n) p *= 2;
+    return p;
+}
 
 int main(void)
 {
@@ -23,8 +30,21 @@ int main(void)
     std::cout << "Header size: " << header.size() << " bytes" << std::endl;
     std::cout << "Number of samples: " << samples.size() << std::endl;
 
-    for (size_t i = 0; i < std::min(samples.size(), size_t(10)); ++i) {
-        std::cout << "Sample[" << i << "]: " << samples[i] << std::endl;
+    const double EPS = 1e-10;
+
+    auto complexSamples = stone::Math::sampleToComplex(samples);
+    size_t targetSize = nextPow2(complexSamples.size());
+    complexSamples.resize(targetSize, std::complex<double>(0, 0));
+
+    auto fftResult = stone::Math::fft(complexSamples);
+    auto ifftResult = stone::Math::ifft(fftResult);
+
+    for (size_t i = 0; i < samples.size(); i++) {
+        if (std::abs(complexSamples[i] - ifftResult[i]) > EPS) {
+            std::cout << "Mismatch at index " << i
+                      << ": " << samples[i]
+                      << " vs " << ifftResult[i] << "\n";
+        }
     }
 
     std::cout << "Test passed." << std::endl;

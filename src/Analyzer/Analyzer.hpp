@@ -11,6 +11,7 @@
 #include <vector>
 #include "ATool.hpp"
 #include <string>
+#include <complex>
 
 namespace stone {
     class Analyzer : public ATool {
@@ -19,15 +20,16 @@ namespace stone {
 
             int execute() const override;
 
-            std::vector<std::pair<double, double>> getData() const;
+            std::vector<std::complex<double>> getData() const;
 
-            void setData(const std::vector<std::pair<double, double>>& data);
+            void setData(const std::vector<std::complex<double>>& data);
 
             int getTopN() const;
 
         private:
             int _topN;
-            std::vector<std::pair<double, double>> _data;
+
+            std::vector<std::complex<double>> _data;
     };
 }
 
