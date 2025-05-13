@@ -19,7 +19,7 @@ namespace stone {
             return nullptr;
         }
         std::string toolType = argv[1];
-        if (toolType == "--analyzer") {
+        if (toolType == "--analyze") {
             if (argc != 4) {
                 return nullptr;
             }
