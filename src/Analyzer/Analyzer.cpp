@@ -38,7 +38,7 @@ namespace stone {
         auto topFrequencies = stone::Math::getTopFrequencies(fftResult, _topN);
         std::cout << "Top " << _topN << " frequencies:" << std::endl;
         for (const auto& [freq, mag] : topFrequencies) {
-            std::cout << std::round(freq * 10.0) / 10.0 << " Hz$" << std::endl;
+            std::cout << std::round(freq * 10.0) / 10.0 << " Hz" << std::endl;
         }
         return 0;
     }

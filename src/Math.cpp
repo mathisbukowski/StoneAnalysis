@@ -12,29 +12,38 @@
 #include <algorithm>
 
 namespace stone {
-    std::vector<std::complex<double>> Math::fft(const std::vector<std::complex<double>>& input)
+    std::vector<std::complex<double>> Math::fft(std::vector<std::complex<double>>& input)
     {
-        int N = input.size();
-        if (N == 1)
-            return input;
+        const size_t N = input.size();
+        const double PI = std::acos(-1);
 
-        std::vector<std::complex<double>> even(N / 2);
-        std::vector<std::complex<double>> odd(N / 2);
-        for (int i = 0; i < N / 2; ++i) {
-            even[i] = input[2 * i];
-            odd[i]  = input[2 * i + 1];
+        size_t j = 0;
+        for (size_t i = 1; i < N; ++i) {
+            size_t bit = N >> 1;
+            while (j & bit) {
+                j ^= bit;
+                bit >>= 1;
+            }
+            j ^= bit;
+
+            if (i < j)
+                std::swap(input[i], input[j]);
         }
-
-        auto eventFFT = fft(even);
-        auto oddFFT  = fft(odd);
-
-        std::vector<std::complex<double>> output(N);
-        for (int k = 0; k < N / 2; ++k) {
-            std::complex<double> w = std::polar(1.0, -2 * M_PI * k / N);
-            output[k] = eventFFT[k] + w * oddFFT[k];
-            output[k + N/2] = eventFFT[k] - w * oddFFT[k];
+        for (size_t len = 2; len <= N; len <<= 1) {
+            double angle = -2 * PI / len;
+            std::complex<double> wlen(std::cos(angle), std::sin(angle));
+            for (size_t i = 0; i < N; i += len) {
+                std::complex<double> w(1.0, 0.0);
+                for (size_t j = 0; j < len / 2; ++j) {
+                    std::complex<double> u = input[i + j];
+                    std::complex<double> v = input[i + j + len / 2] * w;
+                    input[i + j] = u + v;
+                    input[i + j + len / 2] = u - v;
+                    w *= wlen;
+                }
+            }
         }
-        return output;
+        return input;
     }
 
     std::vector<std::complex<double>> Math::ifft(const std::vector<std::complex<double>>& input) 

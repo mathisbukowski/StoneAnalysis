@@ -18,7 +18,7 @@ namespace stone {
     public:
         static std::vector<std::complex<double>> sampleToComplex(const std::vector<int16_t>& samples);
         static std::vector<std::complex<double>> ifft(const std::vector<std::complex<double>>& input);
-        static std::vector<std::complex<double>> fft(const std::vector<std::complex<double>>& input);
+        static std::vector<std::complex<double>> fft(std::vector<std::complex<double>>& input);
         static std::vector<std::pair<double, double>> getTopFrequencies(const std::vector<std::complex<double>>& fftResult, int topN);
         static size_t nextPow2(size_t n);
     };
