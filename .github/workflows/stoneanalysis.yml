@@ -19,7 +19,7 @@ jobs:
   check_program_compilation:
     runs-on: ubuntu-latest
     container:
-      image: epitechcontent/epitest-docker:latest
+      image: epitechcontent/epitest-docker:devel
     steps:
       - name: "Checkout Code"
         uses: actions/checkout@v4
