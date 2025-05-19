@@ -8,6 +8,7 @@
 #include "AudioParser.hpp"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 namespace stone {
     bool AudioParser::load(const std::string& inputFilename)
@@ -17,56 +18,75 @@ namespace stone {
             std::cerr << "Error: Unable to open file " << inputFilename << std::endl;
             return false;
         }
-        _header.resize(44);
-        if (!parseHeader(file))
-            return false;
-        if (!parseSamples(file))
-            return false;
+
+        bool success = parseHeaderAndData(file);
         file.close();
-        return true;
+        return success;
     }
 
-    bool AudioParser::parseHeader(std::ifstream& file)
+    bool AudioParser::parseHeaderAndData(std::ifstream& file)
     {
-        char riff[4], wave[4];
-        
-        file.read(riff, 4);
-        file.ignore(4);
-        file.read(wave, 4);
-        if (std::string(riff, 4) != "RIFF" || std::string(wave, 4) != "WAVE") {
-            std::cerr << "Error: invalid WAV file (incorrect format)" << std::endl;
+        char buffer[4];
+
+        file.read(buffer, 4);
+        if (std::string(buffer, 4) != "RIFF") {
+            std::cerr << "Error: Missing RIFF header" << std::endl;
             return false;
         }
-        return true;
-    }
+        file.ignore(4);
+        file.read(buffer, 4);
+        if (std::string(buffer, 4) != "WAVE") {
+            std::cerr << "Error: Missing WAVE format" << std::endl;
+            return false;
+        }
 
-    bool AudioParser::parseSamples(std::ifstream& file)
-    {
-        std::string foundChunk;
-
-        while (file) {
-            char id[4];
-            uint32_t size = 0;
-
-            if (!file.read(id, 4)) 
-                break;
-            if (!file.read(reinterpret_cast<char*>(&size), sizeof(size)))
-                break;
-
-            std::string chunkId(id, 4);
+        bool fmtFound = false, dataFound = false;
+        uint32_t dataSize = 0;
+        while (file.read(buffer, 4)) {
+            uint32_t chunkSize = 0;
+            file.read(reinterpret_cast<char*>(&chunkSize), sizeof(chunkSize));
+            std::string chunkId(buffer, 4);
 
             if (chunkId == "fmt ") {
-                file.seekg(size, std::ios::cur);
-            } else if (chunkId == "data") {
-                _samples.resize(size / sizeof(int16_t));
-                file.read(reinterpret_cast<char*>(_samples.data()), size);
-                return true;
-            } else {
-                file.seekg(size, std::ios::cur);
+                uint16_t audioFormat;
+                file.read(reinterpret_cast<char*>(&audioFormat), sizeof(audioFormat));
+                file.read(reinterpret_cast<char*>(&_numChannels), sizeof(_numChannels));
+                file.read(reinterpret_cast<char*>(&_sampleRate), sizeof(_sampleRate));
+                file.ignore(6);
+                file.read(reinterpret_cast<char*>(&_bitsPerSample), sizeof(_bitsPerSample));
+                if (audioFormat != 1) {
+                    std::cerr << "Error: Unsupported format (not PCM)" << std::endl;
+                    return false;
+                }
+                if (chunkSize > 16)
+                    file.ignore(chunkSize - 16);
+                fmtFound = true;
+            }
+            else if (chunkId == "data") {
+                dataSize = chunkSize;
+                _samples.resize(dataSize / sizeof(int16_t));
+                file.read(reinterpret_cast<char*>(_samples.data()), dataSize);
+                dataFound = true;
+                break;
+            }
+            else {
+                file.seekg(chunkSize, std::ios::cur);
             }
         }
 
-        std::cerr << "Error: no 'data' chunk found" << std::endl;
-        return false;
+        if (!fmtFound) {
+            std::cerr << "Error: Missing 'fmt ' chunk" << std::endl;
+            return false;
+        }
+        if (!dataFound) {
+            std::cerr << "Error: Missing 'data' chunk" << std::endl;
+            return false;
+        }
+        if (_numChannels != 1 || _sampleRate != 48000 || _bitsPerSample != 16) {
+            std::cerr << "Error: Unsupported WAV format (expected 16bit, mono, 48kHz)" << std::endl;
+            return false;
+        }
+        return true;
     }
 }
+

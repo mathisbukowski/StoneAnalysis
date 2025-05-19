@@ -35,7 +35,8 @@ namespace stone {
         size_t targetSize = stone::Math::nextPow2(complexSamples.size());
         complexSamples.resize(targetSize, std::complex<double>(0, 0));
         auto fftResult = stone::Math::fft(complexSamples);
-        auto topFrequencies = stone::Math::getTopFrequencies(fftResult, _topN);
+        uint32_t sampleRate = parser.getSampleRate();
+        auto topFrequencies = stone::Math::getTopFrequencies(fftResult, _topN, sampleRate);
         std::cout << "Top " << _topN << " frequencies:" << std::endl;
         for (const auto& [freq, mag] : topFrequencies) {
             std::cout << std::round(freq * 10.0) / 10.0 << " Hz" << std::endl;
