@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <complex>
-
+#include <cstdint>
 
 
 namespace stone {
