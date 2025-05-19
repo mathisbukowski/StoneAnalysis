@@ -74,14 +74,15 @@ namespace stone {
 
     std::vector<std::pair<double, double>> Math::getTopFrequencies(
         const std::vector<std::complex<double>>& fftResult,
-        int topN)
+        int topN,
+        uint32_t sampleRate)
     {
         std::vector<std::pair<double, double>> frequencies;
         size_t N = fftResult.size();
     
         for (size_t i = 0; i < N / 2; ++i) {
             double magnitude = std::abs(fftResult[i]);
-            double frequency = static_cast<double>(i) * 48000 / N;
+            double frequency = static_cast<double>(i) * sampleRate / N;
             frequencies.emplace_back(frequency, magnitude);
         }
         std::sort(frequencies.begin(), frequencies.end(), [](const auto& a, const auto& b) {

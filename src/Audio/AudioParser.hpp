@@ -14,23 +14,25 @@
 
 namespace stone {
     class AudioParser {
-        public:
-            AudioParser() = default;
-            ~AudioParser() = default;
+    public:
+        AudioParser() = default;
+        ~AudioParser() = default;
 
-            const std::vector<int16_t>& getSamples() const { return _samples; };
+        bool load(const std::string& inputFilename);
 
-            const std::vector<int16_t>& getHeader() const { return _header; };
+        const std::vector<int16_t>& getSamples() const { return _samples; };
+        uint16_t getNumChannels() const { return _numChannels; };
+        uint32_t getSampleRate() const { return _sampleRate; };
+        uint16_t getBitsPerSample() const { return _bitsPerSample; };
 
-            bool load(const std::string& inputFilename);
+    private:
+        std::vector<int16_t> _samples;
 
-        private:
-            std::vector<int16_t> _samples;
-            std::vector<int16_t> _header;
+        uint16_t _numChannels = 0;
+        uint32_t _sampleRate = 0;
+        uint16_t _bitsPerSample = 0;
 
-            bool parseHeader(std::ifstream& file);
-
-            bool parseSamples(std::ifstream& file);
+        bool parseHeaderAndData(std::ifstream& file);
     };
 }
 
