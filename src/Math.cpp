@@ -5,16 +5,41 @@
 ** Math.cpp
 */
 
-
 #include "Math.hpp"
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 
 namespace stone {
+
+    static bool isPowerOfTwo(size_t n) {
+        return n && !(n & (n - 1));
+    }
+
+    static std::vector<std::complex<double>> naiveDFT(const std::vector<std::complex<double>>& input) {
+        size_t N = input.size();
+        std::vector<std::complex<double>> output(N);
+        const double PI = std::acos(-1);
+
+        for (size_t k = 0; k < N; ++k) {
+            std::complex<double> sum(0.0, 0.0);
+            for (size_t n = 0; n < N; ++n) {
+                double angle = -2 * PI * k * n / N;
+                sum += input[n] * std::complex<double>(std::cos(angle), std::sin(angle));
+            }
+            output[k] = sum;
+        }
+        return output;
+    }
+
     std::vector<std::complex<double>> Math::fft(std::vector<std::complex<double>>& input)
     {
         const size_t N = input.size();
+
+        if (!isPowerOfTwo(N))
+            return naiveDFT(input);
+
         const double PI = std::acos(-1);
 
         size_t j = 0;
@@ -46,29 +71,23 @@ namespace stone {
         return input;
     }
 
-    std::vector<std::complex<double>> Math::ifft(const std::vector<std::complex<double>>& input) 
+    std::vector<std::complex<double>> Math::ifft(const std::vector<std::complex<double>>& input)
     {
-        int N = input.size();
-        
+        size_t N = input.size();
         std::vector<std::complex<double>> conjugatedInput(N);
-        for (int i = 0; i < N; i++)
+        for (size_t i = 0; i < N; i++)
             conjugatedInput[i] = std::conj(input[i]);
-        
         std::vector<std::complex<double>> fftResult = fft(conjugatedInput);
-
-        for (int j = 0; j < N; j++)
+        for (size_t j = 0; j < N; j++)
             fftResult[j] = std::conj(fftResult[j]) / static_cast<double>(N);
-        
         return fftResult;
     }
-
 
     std::vector<std::complex<double>> Math::sampleToComplex(const std::vector<int16_t>& samples)
     {
         std::vector<std::complex<double>> complexSamples(samples.size());
-        for (size_t i = 0; i < samples.size(); i++) {
-            complexSamples[i] = std::complex<double>(samples[i], 0);
-        }
+        for (size_t i = 0; i < samples.size(); i++)
+            complexSamples[i] = std::complex<double>(static_cast<double>(samples[i]), 0.0);
         return complexSamples;
     }
 
@@ -94,6 +113,8 @@ namespace stone {
     }
 
     size_t Math::nextPow2(size_t n) {
+        if (isPowerOfTwo(n))
+            return n;
         size_t p = 1;
         while (p < n) p *= 2;
         return p;
