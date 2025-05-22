@@ -6,8 +6,9 @@
 */
 
 #include "Analyzer.hpp"
-#include "../Audio/AudioParser.hpp"
+#include <iomanip>
 #include <iostream>
+#include "../Audio/AudioParser.hpp"
 #include "../Math.hpp"
 #include "ATool.hpp"
 
@@ -16,7 +17,7 @@ namespace stone {
     Analyzer::Analyzer(const std::string& inputFilename, int topN):
         ATool(inputFilename),
         _topN(topN) {}
-    
+
     int Analyzer::execute() const {
         stone::AudioParser parser;
         if (!parser.load(_inputFilename)) {
@@ -32,14 +33,16 @@ namespace stone {
         }
 
         auto complexSamples = stone::Math::sampleToComplex(samples);
+        size_t originalSize = complexSamples.size();
         size_t targetSize = stone::Math::nextPow2(complexSamples.size());
-        complexSamples.resize(targetSize, std::complex<double>(0, 0));
+        if (targetSize > originalSize)
+            complexSamples.resize(targetSize, std::complex<double>(0.0, 0.0));
         auto fftResult = stone::Math::fft(complexSamples);
         uint32_t sampleRate = parser.getSampleRate();
         auto topFrequencies = stone::Math::getTopFrequencies(fftResult, _topN, sampleRate);
         std::cout << "Top " << _topN << " frequencies:" << std::endl;
         for (const auto& [freq, mag] : topFrequencies) {
-            std::cout << std::round(freq * 10.0) / 10.0 << " Hz" << std::endl;
+            std::cout << std::fixed << std::setprecision(1) << freq << " Hz" << std::endl;
         }
         return 0;
     }
@@ -47,4 +50,4 @@ namespace stone {
     int Analyzer::getTopN() const {
         return _topN;
     }
-};
+}
