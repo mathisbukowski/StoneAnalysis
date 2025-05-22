@@ -10,6 +10,7 @@ SRC = src/main.cpp \
 	src/Math.cpp \
 	src/Analyzer/Analyzer.cpp \
 	src/Factory/ToolFactory.cpp \
+	src/Cypher/Cypher.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
