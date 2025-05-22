@@ -24,11 +24,10 @@ stone::Cypher::Cypher(const std::string& inputFilename, const std::string& outpu
 
 std::vector<bool> stringToBits(const std::string& message) {
     std::vector<bool> bits;
-
     for (const char c : message) {
-        std::bitset<8> b(c);
-        for (int i = 7; i >= 0; i--)
-            bits.push_back(b[i]);
+        for (int i = 7; i >= 0; i--) {
+            bits.push_back((c >> i) & 1);
+        }
     }
     return bits;
 }

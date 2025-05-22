@@ -5,18 +5,19 @@
 ## Makefile
 ##
 
-SRC = src/main.cpp \
-	src/Audio/AudioParser.cpp \
-	src/Math.cpp \
-	src/Analyzer/Analyzer.cpp \
+SRC = src/main.cpp 				\
+	src/Audio/AudioParser.cpp 	\
+	src/Math.cpp 				\
+	src/Analyzer/Analyzer.cpp 	\
 	src/Factory/ToolFactory.cpp \
-	src/Cypher/Cypher.cpp
+	src/Cypher/Cypher.cpp		\
+	src/Decypher/Decypher.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
 NAME = stone_analysis
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -I include
+CXXFLAGS = -Wall -Wextra -Werror -g -std=c++20 -I include
 
 all: $(NAME)
 
