@@ -22,8 +22,10 @@ stone::Cypher::Cypher(const std::string& inputFilename, const std::string& outpu
     this->_message = message;
 }
 
-std::vector<bool> stringToBits(const std::string& message) {
+std::vector<bool> stringToBits(const std::string& message)
+{
     std::vector<bool> bits;
+
     for (const char c : message) {
         for (int i = 7; i >= 0; i--) {
             bits.push_back((c >> i) & 1);
@@ -32,9 +34,19 @@ std::vector<bool> stringToBits(const std::string& message) {
     return bits;
 }
 
+std::vector<bool> intToBits(int nb, int len)
+{
+    std::vector<bool> bits(len);
+
+    for (int i = 0; i < len; ++i) {
+        bits[len - 1 - i] = (nb >> i) & 1;
+    }
+    return bits;
+}
+
 int stone::Cypher::execute() const
 {
-    stone::AudioParser parser;
+    AudioParser parser;
     if (!parser.load(_inputFilename)) {
         std::cerr << "Error: Unable to load file " << _inputFilename << std::endl;
         return 84;
@@ -78,24 +90,51 @@ int stone::Cypher::execute() const
         fftFrames.push_back(Math::fft(complexSamples));
     }
 
+    // Choose first valid fft block
+    size_t validFrameIndex = 0;
+    bool found = false;
+    for (size_t i = 0; i < fftFrames.size(); i++) {
+        double energy = 0.0;
+        for (const auto& c : fftFrames[i])
+            energy += std::abs(c);
+        if (energy > 1e-3) {
+            validFrameIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found || fftFrames.empty()) {
+        std::cerr << "No valid frame found to encode the message." << std::endl;
+        return 84;
+    }
+    std::vector<std::complex<double>>& fftBlock = fftFrames[validFrameIndex];
+
+
     // 3: Change bits of each frame
-    std::vector<std::complex<double>> fftBlock = fftFrames[0];
-    std::vector<bool> bits = stringToBits(this->_message);
+
+    // Encode message len
+    std::vector<bool> lenBits = intToBits(static_cast<uint16_t>(this->_message.size()), 16);
+    std::vector<bool> msgBits = stringToBits(this->_message);
+
+    std::vector<bool> bits = lenBits;
+    bits.insert(bits.end(), msgBits.begin(), msgBits.end());
+
     for (size_t i = 0; i < bits.size(); ++i) {
         const size_t k = 1 + i;
         if (k >= fftBlock.size()) break;
 
         double magnitude = std::abs(fftBlock[k]);
         double phase = bits[i] ? M_PI : 0.0;
-
         fftBlock[k] = std::polar(magnitude, phase);
 
-        size_t mirror = fftBlock.size() - k;
-        if (mirror != k && mirror < fftBlock.size()) {
-            fftBlock[mirror] = std::conj(fftBlock[k]);
+        size_t mirrorIndex = fftBlock.size() - k;
+        if (mirrorIndex < fftBlock.size() && mirrorIndex != k) {
+            fftBlock[mirrorIndex] = std::polar(magnitude, -phase);
         }
     }
-    fftFrames[0] = fftBlock;
+
+    // Sauvegarde dans la frame
+    fftFrames[validFrameIndex] = fftBlock;
 
     // 4: decode with ifft to write the wav
     std::vector<int16_t> outputSamples;

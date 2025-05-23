@@ -62,9 +62,29 @@ int stone::Decypher::execute() const
         fftFrames.push_back(Math::fft(complexSamples));
     }
 
-    std::vector<std::complex<double>> fftBlock = fftFrames[0];
+    // Choose first valid fft block
+    size_t validFrameIndex = 0;
+    bool found = false;
+    for (size_t i = 0; i < fftFrames.size(); i++) {
+        double energy = 0.0;
+        for (const auto& c : fftFrames[i])
+            energy += std::abs(c);
+        if (energy > 1e-3) {
+            validFrameIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        std::cerr << "No valid frame found to decode the message." << std::endl;
+        return 84;
+    }
+    std::vector<std::complex<double>>& fftBlock = fftFrames[validFrameIndex];
+
     std::vector<bool> bits;
-    for (size_t i = 0; i < 33; i++) {
+    size_t maxBits = std::min((size_t)(fftBlock.size() / 2 - 1), (size_t)1022);
+
+    for (size_t i = 0; i < maxBits; i++) {
         size_t k = 1 + i;
         if (k >= fftBlock.size()) break;
 
@@ -74,15 +94,28 @@ int stone::Decypher::execute() const
         bits.push_back(bit);
     }
 
+    // Get message size
+    uint16_t msgLen = 0;
+    for (int i = 0; i < 16; i++) {
+        msgLen = (msgLen << 1) | bits[i];
+    }
+
+    if (bits.size() < (size_t)(16 + msgLen * 8)) {
+        std::cerr << "Erreur : pas assez de bits pour décoder le message." << std::endl;
+        return 84;
+    }
+
     std::string result;
-    for (size_t i = 0; i + 7 < bits.size(); i += 8) {
+    for (size_t i = 0; i < msgLen; i++) {
         uint8_t c = 0;
-        for (int b = 0; b < 8; ++b) {
-            c = (c << 1) | bits[i + b];
+        for (int b = 0; b < 8; b++) {
+            c = (c << 1) | bits[16 + i * 8 + b];
         }
         if (c == '\0') break;
         result += static_cast<char>(c);
     }
+
+
     std::cout << "Message caché : " << result << std::endl;
     return 0;
 }
