@@ -13,13 +13,13 @@
 
 namespace stone {
     class Decypher : public ATool {
-        public:
-            Decypher(const std::string& inputFilename);
+    public:
+        Decypher(const std::string& inputFilename);
 
-            int execute() const override;
-            std::string _message;
+        int execute() const override;
+    private:
+        std::string _message;
     };
 }
 
 #endif /* !DECYPHER_HPP_ */
-

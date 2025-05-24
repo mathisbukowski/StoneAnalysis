@@ -19,6 +19,13 @@ namespace stone {
             return false;
         }
 
+        // Copy header
+        std::vector<char> buffer(44);
+        file.read(buffer.data(), 44);
+        buffer.resize(file.gcount());
+        this->_header = buffer;
+        file.seekg(0);
+
         bool success = parseHeaderAndData(file);
         file.close();
         return success;
@@ -89,4 +96,3 @@ namespace stone {
         return true;
     }
 }
-

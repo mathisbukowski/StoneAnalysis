@@ -24,18 +24,17 @@ namespace stone {
                 return nullptr;
             }
             return std::make_unique<Analyzer>(argv[2], std::stoi(argv[3]));
+        } else if (toolType == "--cypher") {
+            if (argc != 5) {
+                return nullptr;
+            }
+            return std::make_unique<Cypher>(argv[2], argv[3], argv[4]);
+        } else if (toolType == "--decypher") {
+            if (argc != 3) {
+                return nullptr;
+            }
+            return std::make_unique<Decypher>(argv[2]);
         }
-        // } else if (toolType == "--cypher") {
-        //     if (argc != 5) {
-        //         return nullptr;
-        //     }
-        //     return std::make_unique<Cypher>(argv[2], argv[3], argv[4]);
-        // } else if (toolType == "--decypher") {
-        //     if (argc != 3) {
-        //         return nullptr;
-        //     }
-        //     return std::make_unique<Decypher>(argv[2]);
-        // }
         return nullptr;
     }
 }

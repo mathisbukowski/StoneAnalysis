@@ -5,11 +5,13 @@
 ## Makefile
 ##
 
-SRC = src/main.cpp \
-	src/Audio/AudioParser.cpp \
-	src/Math.cpp \
-	src/Analyzer/Analyzer.cpp \
+SRC = src/main.cpp 				\
+	src/Audio/AudioParser.cpp 	\
+	src/Math.cpp 				\
+	src/Analyzer/Analyzer.cpp 	\
 	src/Factory/ToolFactory.cpp \
+	src/Cypher/Cypher.cpp		\
+	src/Decypher/Decypher.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
