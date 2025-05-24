@@ -115,25 +115,24 @@ int stone::Cypher::execute() const
     // Encode message len
     std::vector<bool> lenBits = intToBits(static_cast<uint16_t>(this->_message.size()), 16);
     std::vector<bool> msgBits = stringToBits(this->_message);
-
     std::vector<bool> bits = lenBits;
     bits.insert(bits.end(), msgBits.begin(), msgBits.end());
 
+    // Encode message
     for (size_t i = 0; i < bits.size(); ++i) {
         const size_t k = 1 + i;
-        if (k >= fftBlock.size()) break;
+        if (k >= fftBlock.size() / 2) break;
 
         double magnitude = std::abs(fftBlock[k]);
         double phase = bits[i] ? M_PI : 0.0;
+
         fftBlock[k] = std::polar(magnitude, phase);
 
         size_t mirrorIndex = fftBlock.size() - k;
-        if (mirrorIndex < fftBlock.size() && mirrorIndex != k) {
-            fftBlock[mirrorIndex] = std::polar(magnitude, -phase);
-        }
+        if (mirrorIndex < fftBlock.size() && mirrorIndex != k)
+            fftBlock[mirrorIndex] = std::conj(fftBlock[k]);
     }
 
-    // Sauvegarde dans la frame
     fftFrames[validFrameIndex] = fftBlock;
 
     // 4: decode with ifft to write the wav

@@ -82,15 +82,17 @@ int stone::Decypher::execute() const
     std::vector<std::complex<double>>& fftBlock = fftFrames[validFrameIndex];
 
     std::vector<bool> bits;
-    size_t maxBits = std::min((size_t)(fftBlock.size() / 2 - 1), (size_t)1022);
+    const size_t maxBits = std::min((fftBlock.size() / 2 - 1), static_cast<size_t>(1022));
+    size_t k;
 
     for (size_t i = 0; i < maxBits; i++) {
-        size_t k = 1 + i;
+        k = 1 + i;
         if (k >= fftBlock.size()) break;
 
         double phase = std::arg(fftBlock[k]);
-        if (phase < 0) phase += 2 * M_PI;
-            bool bit = std::abs(phase - M_PI) < 0.5;
+        if (phase < 0)
+            phase += 2 * M_PI;
+        const bool bit = std::abs(phase - M_PI) < 0.5;
         bits.push_back(bit);
     }
 
@@ -101,7 +103,7 @@ int stone::Decypher::execute() const
     }
 
     if (bits.size() < (size_t)(16 + msgLen * 8)) {
-        std::cerr << "Erreur : pas assez de bits pour décoder le message." << std::endl;
+        std::cerr << "Error: not enough byte to decode message." << std::endl;
         return 84;
     }
 
@@ -115,7 +117,6 @@ int stone::Decypher::execute() const
         result += static_cast<char>(c);
     }
 
-
-    std::cout << "Message caché : " << result << std::endl;
+    std::cout << result << std::endl;
     return 0;
 }
