@@ -17,7 +17,7 @@ OBJ = $(SRC:.cpp=.o)
 
 NAME = stone_analysis
 
-CXXFLAGS = -Wall -Wextra -Werror -g -std=c++20 -I include
+CXXFLAGS = -Wall -Wextra -Werror -std=c++20 -I include
 
 all: $(NAME)
 
